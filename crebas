@@ -1,0 +1,110 @@
+/*==============================================================*/
+/* DBMS name:      SAP SQL Anywhere 17                          */
+/* Created on:     17.02.2018 22:49:27                          */
+/*==============================================================*/
+
+
+if exists(select 1 from sys.sysforeignkey where role='FK_MANUFACT_RELATIONS_CATEGORY') then
+    alter table Manufacturer
+       delete foreign key FK_MANUFACT_RELATIONS_CATEGORY
+end if;
+
+if exists(select 1 from sys.sysforeignkey where role='FK_MODEL_RELATIONS_MANUFACT') then
+    alter table Model
+       delete foreign key FK_MODEL_RELATIONS_MANUFACT
+end if;
+
+drop index if exists Category.Category_PK;
+
+drop table if exists Category;
+
+drop index if exists Manufacturer.Relationship_1_FK;
+
+drop index if exists Manufacturer.Manufacturer_PK;
+
+drop table if exists Manufacturer;
+
+drop index if exists Model.Relationship_2_FK;
+
+drop index if exists Model.Model_PK;
+
+drop table if exists Model;
+
+/*==============================================================*/
+/* Table: Category                                              */
+/*==============================================================*/
+create or replace table Category 
+(
+   name_category        varchar(255)                   not null,
+   constraint PK_CATEGORY primary key clustered (name_category)
+);
+
+/*==============================================================*/
+/* Index: Category_PK                                           */
+/*==============================================================*/
+create unique clustered index Category_PK on Category (
+name_category ASC
+);
+
+/*==============================================================*/
+/* Table: Manufacturer                                          */
+/*==============================================================*/
+create or replace table Manufacturer 
+(
+   name_manufacturer    varchar(255)                   not null,
+   name_category        varchar(255)                   not null,
+   country              varchar(255)                   null,
+   constraint PK_MANUFACTURER primary key clustered (name_manufacturer)
+);
+
+/*==============================================================*/
+/* Index: Manufacturer_PK                                       */
+/*==============================================================*/
+create unique clustered index Manufacturer_PK on Manufacturer (
+name_manufacturer ASC
+);
+
+/*==============================================================*/
+/* Index: Relationship_1_FK                                     */
+/*==============================================================*/
+create index Relationship_1_FK on Manufacturer (
+name_category ASC
+);
+
+/*==============================================================*/
+/* Table: Model                                                 */
+/*==============================================================*/
+create or replace table Model 
+(
+   name_model           varchar(255)                   not null,
+   name_manufacturer    varchar(255)                   not null,
+   price                integer                        null,
+   constraint PK_MODEL primary key clustered (name_model)
+);
+
+/*==============================================================*/
+/* Index: Model_PK                                              */
+/*==============================================================*/
+create unique clustered index Model_PK on Model (
+name_model ASC
+);
+
+/*==============================================================*/
+/* Index: Relationship_2_FK                                     */
+/*==============================================================*/
+create index Relationship_2_FK on Model (
+name_manufacturer ASC
+);
+
+alter table Manufacturer
+   add constraint FK_MANUFACT_RELATIONS_CATEGORY foreign key (name_category)
+      references Category (name_category)
+      on update restrict
+      on delete restrict;
+
+alter table Model
+   add constraint FK_MODEL_RELATIONS_MANUFACT foreign key (name_manufacturer)
+      references Manufacturer (name_manufacturer)
+      on update restrict
+      on delete restrict;
+
