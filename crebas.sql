@@ -1,89 +1,98 @@
---==============================================================
--- DBMS name:      ANSI Level 2
--- Created on:     17.02.2018 22:59:13
---==============================================================
+/*==============================================================*/
+/* DBMS name:      Microsoft SQL Server 2016                    */
+/* Created on:     18.02.2018 13:31:40                          */
+/*==============================================================*/
 
 
-drop index Category_PK;
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('Category')
+            and   type = 'U')
+   drop table Category
+go
 
-drop table Category cascade;
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('Manufacturer')
+            and   name  = 'Relationship_1_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index Manufacturer.Relationship_1_FK
+go
 
-drop index Relationship_1_FK;
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('Manufacturer')
+            and   type = 'U')
+   drop table Manufacturer
+go
 
-drop index Manufacturer_PK;
+if exists (select 1
+            from  sysindexes
+           where  id    = object_id('Model')
+            and   name  = 'Relationship_2_FK'
+            and   indid > 0
+            and   indid < 255)
+   drop index Model.Relationship_2_FK
+go
 
-drop table Manufacturer cascade;
+if exists (select 1
+            from  sysobjects
+           where  id = object_id('Model')
+            and   type = 'U')
+   drop table Model
+go
 
-drop index Relationship_2_FK;
-
-drop index Model_PK;
-
-drop table Model cascade;
-
---==============================================================
--- Table: Category
---==============================================================
+/*==============================================================*/
+/* Table: Category                                              */
+/*==============================================================*/
 create table Category (
-name_category        CHAR(1000)           not null,
-primary key (name_category)
-);
+   name_category        varchar(255)         not null,
+   id_c                 int                  not null,
+   constraint PK_CATEGORY primary key (id_c)
+)
+go
 
---==============================================================
--- Index: Category_PK
---==============================================================
-create unique index Category_PK on Category (
-name_category ASC
-);
-
---==============================================================
--- Table: Manufacturer
---==============================================================
+/*==============================================================*/
+/* Table: Manufacturer                                          */
+/*==============================================================*/
 create table Manufacturer (
-name_manufacturer    CHAR(1000)           not null,
-name_category        CHAR(1000)           not null,
-country              CHAR(1000),
-primary key (name_manufacturer),
-foreign key (name_category)
-      references Category (name_category)
-);
+   name_manufacturer    varchar(255)         not null,
+   country              varchar(255)         null,
+   id_m                 int                  not null,
+   id_c                 int                  not null,
+   constraint PK_MANUFACTURER primary key (id_m)
+)
+go
 
---==============================================================
--- Index: Manufacturer_PK
---==============================================================
-create unique index Manufacturer_PK on Manufacturer (
-name_manufacturer ASC
-);
+/*==============================================================*/
+/* Index: Relationship_1_FK                                     */
+/*==============================================================*/
 
---==============================================================
--- Index: Relationship_1_FK
---==============================================================
-create  index Relationship_1_FK on Manufacturer (
-name_category ASC
-);
 
---==============================================================
--- Table: Model
---==============================================================
+
+
+create nonclustered index Relationship_1_FK on Manufacturer (id_c ASC)
+go
+
+/*==============================================================*/
+/* Table: Model                                                 */
+/*==============================================================*/
 create table Model (
-name_model           CHAR(1000)           not null,
-name_manufacturer    CHAR(1000)           not null,
-price                INTEGER,
-primary key (name_model),
-foreign key (name_manufacturer)
-      references Manufacturer (name_manufacturer)
-);
+   name_model           varchar(255)         not null,
+   id_m                 int                  not null,
+   price                int                  null,
+   constraint PK_MODEL primary key (name_model)
+)
+go
 
---==============================================================
--- Index: Model_PK
---==============================================================
-create unique index Model_PK on Model (
-name_model ASC
-);
+/*==============================================================*/
+/* Index: Relationship_2_FK                                     */
+/*==============================================================*/
 
---==============================================================
--- Index: Relationship_2_FK
---==============================================================
-create  index Relationship_2_FK on Model (
-name_manufacturer ASC
-);
+
+
+
+create nonclustered index Relationship_2_FK on Model (id_m ASC)
+go
 
